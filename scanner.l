@@ -1,63 +1,23 @@
 %{
-#include <stdio.h>
+#include "parser.tab.h"
+#include <stdlib.h>
+#include <string.h>
 %}
 
 %%
 
-"if"        { printf("KEYWORD: if\n"); }
-"elif"      { printf("KEYWORD: elif\n"); }
-"else"      { printf("KEYWORD: else\n"); }
-"while"     { printf("KEYWORD: while\n"); }
-"return"    { printf("KEYWORD: return\n"); }
-"and"       { printf("KEYWORD: and\n"); }
-"or"        { printf("KEYWORD: or\n"); }
-"not"       { printf("KEYWORD: not\n"); }
-"pass"      { printf("KEYWORD: pass\n"); }
-"def"       { printf("KEYWORD: def\n"); }
-"bool"      { printf("KEYWORD: bool\n"); }
-"int"       { printf("KEYWORD: int\n"); }
-"string"    { printf("KEYWORD: string\n"); }
+"int"       { return INT; }
+"return"    { return RETURN; }
 
-"=="        { printf("OPERATOR: ==\n"); }
-">="        { printf("OPERATOR: >=\n"); }
-"<="        { printf("OPERATOR: <=\n"); }
-"!="        { printf("OPERATOR: !=\n"); }
-">"         { printf("OPERATOR: >\n"); }
-"<"         { printf("OPERATOR: <\n"); }
-"**"        { printf("OPERATOR: **\n"); }
-"+"         { printf("OPERATOR: +\n"); }
-"-"         { printf("OPERATOR: -\n"); }
-"*"         { printf("OPERATOR: *\n"); }
-"/"         { printf("OPERATOR: /\n"); }
-"="         { printf("ASSIGN: =\n"); }
+[0-9]+      { yylval.num = atoi(yytext); return NUMBER; }
+[a-zA-Z_][a-zA-Z0-9_]*  { yylval.id = strdup(yytext); return IDENTIFIER; }
 
-";"         { printf("SEMICOLON: ;\n"); }
-","         { printf("COMMA: ,\n"); }
-"{"         { printf("LBRACE: {\n"); }
-"}"         { printf("RBRACE: }\n"); }
-"("         { printf("LPAREN: (\n"); }
-")"         { printf("RPAREN: )\n"); }
-"->"        { printf("ARROW: ->\n"); }
-":"         { printf("COLON: :\n"); }
-"["         { printf("LBRACKET: [\n"); }
-"]"         { printf("RBRACKET: ]\n"); }
+"="         { return ASSIGN; }
+"+"         { return PLUS; }
+";"         { return SEMICOLON; }
 
-[0-9]+\.[0-9]+       { printf("FLOAT_LITERAL: %s\n", yytext); }
-[0-9]+               { printf("INT_LITERAL: %s\n", yytext); }
-"True"|"False"       { printf("BOOL_LITERAL: %s\n", yytext); }
-\"[^\n\"]*\"         { printf("STRING_LITERAL: %s\n", yytext); }
-\'[^\n\']*\'         { printf("STRING_LITERAL: %s\n", yytext); }
+[ \t\r\n]+  ; // דילוג על רווחים
 
-[_a-zA-Z][_a-zA-Z0-9]*   { printf("IDENTIFIER: %s\n", yytext); }
-
-"#"[^\n]*           { /* תגובה – התעלם */ }
-[ \t\r\n]+          { /* התעלם מרווחים */ }
-
-.                   { printf("UNKNOWN CHARACTER: %s\n", yytext); }
+.           { return yytext[0]; }
 
 %%
-
-int main(int argc, char **argv) {
-    yylex();
-    return 0;
-}
