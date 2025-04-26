@@ -44,6 +44,12 @@
 #if YYDEBUG
 extern int yydebug;
 #endif
+/* "%code requires" blocks.  */
+#line 1 "parser.y"
+
+    #include "ast.h"
+
+#line 53 "parser.tab.h"
 
 /* Token kinds.  */
 #ifndef YYTOKENTYPE
@@ -55,12 +61,48 @@ extern int yydebug;
     YYerror = 256,                 /* error  */
     YYUNDEF = 257,                 /* "invalid token"  */
     NUMBER = 258,                  /* NUMBER  */
-    IDENTIFIER = 259,              /* IDENTIFIER  */
-    INT = 260,                     /* INT  */
-    RETURN = 261,                  /* RETURN  */
-    ASSIGN = 262,                  /* ASSIGN  */
-    PLUS = 263,                    /* PLUS  */
-    SEMICOLON = 264                /* SEMICOLON  */
+    BOOL = 259,                    /* BOOL  */
+    FLOAT_LITERAL = 260,           /* FLOAT_LITERAL  */
+    IDENTIFIER = 261,              /* IDENTIFIER  */
+    STRING_LITERAL = 262,          /* STRING_LITERAL  */
+    INT = 263,                     /* INT  */
+    FLOAT = 264,                   /* FLOAT  */
+    DOUBLE = 265,                  /* DOUBLE  */
+    STRING = 266,                  /* STRING  */
+    CHAR = 267,                    /* CHAR  */
+    RETURN = 268,                  /* RETURN  */
+    ASSIGN = 269,                  /* ASSIGN  */
+    PLUS = 270,                    /* PLUS  */
+    MINUS = 271,                   /* MINUS  */
+    MULT = 272,                    /* MULT  */
+    DIV = 273,                     /* DIV  */
+    SEMICOLON = 274,               /* SEMICOLON  */
+    LPAREN = 275,                  /* LPAREN  */
+    RPAREN = 276,                  /* RPAREN  */
+    LBRACE = 277,                  /* LBRACE  */
+    RBRACE = 278,                  /* RBRACE  */
+    LBRACK = 279,                  /* LBRACK  */
+    RBRACK = 280,                  /* RBRACK  */
+    IF = 281,                      /* IF  */
+    ELIF = 282,                    /* ELIF  */
+    ELSE = 283,                    /* ELSE  */
+    COLON = 284,                   /* COLON  */
+    PASS = 285,                    /* PASS  */
+    WHILE = 286,                   /* WHILE  */
+    DEF = 287,                     /* DEF  */
+    COMMA = 288,                   /* COMMA  */
+    ARROW = 289,                   /* ARROW  */
+    EQ = 290,                      /* EQ  */
+    NEQ = 291,                     /* NEQ  */
+    GT = 292,                      /* GT  */
+    LT = 293,                      /* LT  */
+    GE = 294,                      /* GE  */
+    LE = 295,                      /* LE  */
+    AND = 296,                     /* AND  */
+    OR = 297,                      /* OR  */
+    NOT = 298,                     /* NOT  */
+    POW = 299,                     /* POW  */
+    UMINUS = 300                   /* UMINUS  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -69,13 +111,14 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 12 "parser.y"
+#line 16 "parser.y"
 
     int num;
+    float fnum;
     char* id;
     ASTNode* node;
 
-#line 79 "parser.tab.h"
+#line 122 "parser.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;
