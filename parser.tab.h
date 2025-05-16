@@ -65,44 +65,40 @@ extern int yydebug;
     FLOAT_LITERAL = 260,           /* FLOAT_LITERAL  */
     IDENTIFIER = 261,              /* IDENTIFIER  */
     STRING_LITERAL = 262,          /* STRING_LITERAL  */
-    INT = 263,                     /* INT  */
-    FLOAT = 264,                   /* FLOAT  */
-    DOUBLE = 265,                  /* DOUBLE  */
-    STRING = 266,                  /* STRING  */
-    CHAR = 267,                    /* CHAR  */
-    RETURN = 268,                  /* RETURN  */
-    ASSIGN = 269,                  /* ASSIGN  */
-    PLUS = 270,                    /* PLUS  */
-    MINUS = 271,                   /* MINUS  */
-    MULT = 272,                    /* MULT  */
-    DIV = 273,                     /* DIV  */
-    SEMICOLON = 274,               /* SEMICOLON  */
-    LPAREN = 275,                  /* LPAREN  */
-    RPAREN = 276,                  /* RPAREN  */
-    LBRACE = 277,                  /* LBRACE  */
-    RBRACE = 278,                  /* RBRACE  */
-    LBRACK = 279,                  /* LBRACK  */
-    RBRACK = 280,                  /* RBRACK  */
-    IF = 281,                      /* IF  */
-    ELIF = 282,                    /* ELIF  */
-    ELSE = 283,                    /* ELSE  */
-    COLON = 284,                   /* COLON  */
-    PASS = 285,                    /* PASS  */
-    WHILE = 286,                   /* WHILE  */
-    DEF = 287,                     /* DEF  */
-    COMMA = 288,                   /* COMMA  */
-    ARROW = 289,                   /* ARROW  */
-    EQ = 290,                      /* EQ  */
-    NEQ = 291,                     /* NEQ  */
-    GT = 292,                      /* GT  */
-    LT = 293,                      /* LT  */
-    GE = 294,                      /* GE  */
-    LE = 295,                      /* LE  */
-    AND = 296,                     /* AND  */
-    OR = 297,                      /* OR  */
-    NOT = 298,                     /* NOT  */
-    POW = 299,                     /* POW  */
-    UMINUS = 300                   /* UMINUS  */
+    TYPE = 263,                    /* TYPE  */
+    RETURN = 264,                  /* RETURN  */
+    ASSIGN = 265,                  /* ASSIGN  */
+    PLUS = 266,                    /* PLUS  */
+    MINUS = 267,                   /* MINUS  */
+    MULT = 268,                    /* MULT  */
+    DIV = 269,                     /* DIV  */
+    SEMICOLON = 270,               /* SEMICOLON  */
+    LPAREN = 271,                  /* LPAREN  */
+    RPAREN = 272,                  /* RPAREN  */
+    LBRACE = 273,                  /* LBRACE  */
+    RBRACE = 274,                  /* RBRACE  */
+    LBRACK = 275,                  /* LBRACK  */
+    RBRACK = 276,                  /* RBRACK  */
+    IF = 277,                      /* IF  */
+    ELIF = 278,                    /* ELIF  */
+    ELSE = 279,                    /* ELSE  */
+    COLON = 280,                   /* COLON  */
+    PASS = 281,                    /* PASS  */
+    WHILE = 282,                   /* WHILE  */
+    DEF = 283,                     /* DEF  */
+    COMMA = 284,                   /* COMMA  */
+    ARROW = 285,                   /* ARROW  */
+    EQ = 286,                      /* EQ  */
+    NEQ = 287,                     /* NEQ  */
+    GT = 288,                      /* GT  */
+    LT = 289,                      /* LT  */
+    GE = 290,                      /* GE  */
+    LE = 291,                      /* LE  */
+    AND = 292,                     /* AND  */
+    OR = 293,                      /* OR  */
+    NOT = 294,                     /* NOT  */
+    POW = 295,                     /* POW  */
+    UMINUS = 296                   /* UMINUS  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -118,7 +114,7 @@ union YYSTYPE
     char* id;
     ASTNode* node;
 
-#line 122 "parser.tab.h"
+#line 118 "parser.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

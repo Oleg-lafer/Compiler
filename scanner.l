@@ -9,11 +9,13 @@ int yylineno = 1;
 %%
 
 "def"           { return DEF; }
-"int"           { return INT; }
-"float"         { return FLOAT; }
-"double"        { return DOUBLE; }
-"string"        { return STRING; }
-"char"          { return CHAR; }
+"int"           { yylval.id = strdup("int"); return TYPE; }
+"float"         { yylval.id = strdup("float"); return TYPE; }
+"double"        { yylval.id = strdup("double"); return TYPE; }
+"string"        { yylval.id = strdup("string"); return TYPE; }
+"char"          { yylval.id = strdup("char"); return TYPE; }
+"bool"          { yylval.id = strdup("bool"); return TYPE; }
+
 "return"        { return RETURN; }
 "if"            { return IF; }
 "elif"          { return ELIF; }

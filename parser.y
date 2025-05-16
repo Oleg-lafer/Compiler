@@ -23,7 +23,7 @@ int yyerror(const char *s);
 %token <num> NUMBER BOOL
 %token <fnum> FLOAT_LITERAL
 %token <id> IDENTIFIER STRING_LITERAL
-%token INT FLOAT DOUBLE STRING CHAR
+%token <id> TYPE
 %token RETURN ASSIGN PLUS MINUS MULT DIV SEMICOLON
 %token LPAREN RPAREN
 %token LBRACE RBRACE
@@ -33,7 +33,8 @@ int yyerror(const char *s);
 %token AND OR NOT
 %token POW
 
-%type <node> program function_list function_def param_list param_decl_list arg_list block statements statement declaration assignment return_statement expression if_stmt elif_list else_opt while_stmt
+%type <id> return_type_opt
+%type <node> program function_list function_def param_list param_group_list param_group param_decl_list param_decl arg_list block statements statement declaration assignment return_statement expression if_stmt elif_list else_opt while_stmt
 
 %left OR
 %left AND
@@ -67,34 +68,79 @@ function_list:
 ;
 
 function_def:
-    DEF IDENTIFIER LPAREN param_list RPAREN COLON block {
+    DEF IDENTIFIER LPAREN param_list RPAREN return_type_opt COLON block {
         ASTNode* name = create_node($2, 0);
-        $$ = create_node("FUNC", 3, name, $4, $7);
+        ASTNode* return_type = $6 ? create_node($6, 0) : create_node("void", 0);
+        ASTNode* func = create_node("FUNC", 4, name, $4, return_type, $8);
+        $$ = func;
         free($2);
+        if ($6) free($6);
     }
+;
+
+return_type_opt:
+    /* empty */      { $$ = NULL; }
+  | ARROW TYPE       { $$ = $2; }
 ;
 
 param_list:
     /* empty */ { $$ = create_node("PARAMS", 0); }
-  | param_decl_list { $$ = $1; }
+  | param_group_list { $$ = $1; }
+;
+
+param_group_list:
+    param_group { $$ = $1; }
+  | param_group_list SEMICOLON param_group {
+        ASTNode** new_children = malloc(sizeof(ASTNode*) * ($1->child_count + $3->child_count));
+        for (int i = 0; i < $1->child_count; i++) new_children[i] = $1->children[i];
+        for (int i = 0; i < $3->child_count; i++) new_children[$1->child_count + i] = $3->children[i];
+        free($1->children); free($3->children);
+        $1->children = new_children;
+        $1->child_count += $3->child_count;
+        $$ = $1;
+    }
+;
+
+param_group:
+    TYPE param_decl_list {
+        for (int i = 0; i < $2->child_count; i++) {
+            ASTNode* param = $2->children[i];
+            free(param->children[0]);
+            param->children[0] = create_node($1, 0);
+        }
+        $$ = $2;
+        free($1);
+    }
 ;
 
 param_decl_list:
-    IDENTIFIER {
-        $$ = create_node("PARAMS", 1, create_node($1, 0));
-        free($1);
-    }
-  | param_decl_list COMMA IDENTIFIER {
+    param_decl { $$ = create_node("PARAMS", 1, $1); }
+  | param_decl_list COMMA param_decl {
         ASTNode** new_children = malloc(sizeof(ASTNode*) * ($1->child_count + 1));
         for (int i = 0; i < $1->child_count; i++) new_children[i] = $1->children[i];
-        new_children[$1->child_count] = create_node($3, 0);
+        new_children[$1->child_count] = $3;
         free($1->children);
         $1->children = new_children;
         $1->child_count++;
         $$ = $1;
-        free($3);
     }
 ;
+
+param_decl:
+    IDENTIFIER {
+        ASTNode* id = create_node($1, 0);
+        $$ = create_node("PARAM", 2, create_node("DUMMY", 0), id);
+        free($1);
+    }
+  | IDENTIFIER COLON expression {
+        ASTNode* id = create_node($1, 0);
+        $$ = create_node("PARAM_DEFAULT", 3, create_node("DUMMY", 0), id, $3);
+        free($1);
+    }
+;
+
+
+
 
 block:
     LBRACE statements RBRACE {
@@ -127,27 +173,22 @@ statement:
 ;
 
 declaration:
-      INT IDENTIFIER {
-        $$ = create_node("DECL", 2, create_node("int", 0), create_node($2, 0));
+    TYPE IDENTIFIER {
+        $$ = create_node("DECL", 2, create_node($1, 0), create_node($2, 0));
+        free($1);
         free($2);
     }
-    | FLOAT IDENTIFIER {
-        $$ = create_node("DECL", 2, create_node("float", 0), create_node($2, 0));
-        free($2);
-    }
-    | DOUBLE IDENTIFIER {
-        $$ = create_node("DECL", 2, create_node("double", 0), create_node($2, 0));
-        free($2);
-    }
-    | STRING IDENTIFIER {
-        $$ = create_node("DECL", 2, create_node("string", 0), create_node($2, 0));
-        free($2);
-    }
-    | CHAR IDENTIFIER {
-        $$ = create_node("DECL", 2, create_node("char", 0), create_node($2, 0));
+  | TYPE IDENTIFIER ASSIGN expression {
+        ASTNode* type = create_node($1, 0);
+        ASTNode* id = create_node($2, 0);
+        $$ = create_node("DECL_ASSIGN", 3, type, id, $4);
+        free($1);
         free($2);
     }
 ;
+
+
+
 
 assignment:
     IDENTIFIER ASSIGN expression {
@@ -291,10 +332,10 @@ elif_list:
 
 else_opt:
     /* empty */ { $$ = NULL; }
-  | ELSE COLON block {
-        $$ = $3;
-    }
+  | ELSE COLON block            { $$ = $3; }
+  | ELSE COLON statement        { $$ = create_node("BLOCK", 1, $3); }
 ;
+
 
 while_stmt:
     WHILE expression COLON block {
