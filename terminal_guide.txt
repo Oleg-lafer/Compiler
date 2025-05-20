@@ -1,10 +1,10 @@
-bison -d parser.y
-flex scanner.l
-gcc -o parser parser.tab.c lex.yy.c -lfl
-./parser < test.txt
-
 
 bison -d parser.y
 flex scanner.l
 gcc -o parser parser.tab.c lex.yy.c ast.c -lfl
 ./parser < test.txt
+
+flex scanner.l
+bison -d parser.y
+gcc -o myparser parser.tab.c lex.yy.c ast.c semantic.c -lfl
+./myparser < test.txt

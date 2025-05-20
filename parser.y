@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "ast.h"
+#include "semantic.h"
 
 ASTNode* root = NULL;
 int yylex();
@@ -24,6 +25,7 @@ int yyerror(const char *s);
 %token <fnum> FLOAT_LITERAL
 %token <id> IDENTIFIER STRING_LITERAL
 %token <id> TYPE
+%token IS
 %token RETURN ASSIGN PLUS MINUS MULT DIV SEMICOLON
 %token LPAREN RPAREN
 %token LBRACE RBRACE
@@ -78,6 +80,7 @@ function_def:
     }
 ;
 
+
 return_type_opt:
     /* empty */      { $$ = NULL; }
   | ARROW TYPE       { $$ = $2; }
@@ -105,11 +108,16 @@ param_group:
     TYPE param_decl_list {
         for (int i = 0; i < $2->child_count; i++) {
             ASTNode* param = $2->children[i];
-            free(param->children[0]);
-            param->children[0] = create_node($1, 0);
+            if (strcmp(param->children[0]->name, "DUMMY") == 0) {
+                free(param->children[0]);
+                param->children[0] = create_node($1, 0);
+            }
         }
         $$ = $2;
         free($1);
+    }
+  | param_decl_list {
+        $$ = $1;  // for id: type = value style that sets its own type
     }
 ;
 
@@ -127,6 +135,7 @@ param_decl_list:
 ;
 
 param_decl:
+    // TYPE-first style
     IDENTIFIER {
         ASTNode* id = create_node($1, 0);
         $$ = create_node("PARAM", 2, create_node("DUMMY", 0), id);
@@ -137,7 +146,22 @@ param_decl:
         $$ = create_node("PARAM_DEFAULT", 3, create_node("DUMMY", 0), id, $3);
         free($1);
     }
+    // ID-first style
+  | IDENTIFIER COLON TYPE {
+        ASTNode* type = create_node($3, 0);
+        ASTNode* id = create_node($1, 0);
+        $$ = create_node("PARAM", 2, type, id);
+        free($1); free($3);
+    }
+  | IDENTIFIER COLON TYPE ASSIGN expression {
+        ASTNode* type = create_node($3, 0);
+        ASTNode* id = create_node($1, 0);
+        $$ = create_node("PARAM_DEFAULT", 3, type, id, $5);
+        free($1); free($3);
+    }
 ;
+
+
 
 
 
@@ -170,6 +194,9 @@ statement:
     | expression SEMICOLON { $$ = $1; }
     | if_stmt
     | while_stmt
+    | PASS SEMICOLON { $$ = create_node("PASS", 0); }
+    | block
+
 ;
 
 declaration:
@@ -201,7 +228,11 @@ return_statement:
     RETURN expression {
         $$ = create_node("RETURN", 1, $2);
     }
+  | RETURN {
+        $$ = create_node("RETURN", 0);  // no children
+    }
 ;
+
 
 expression:
     NUMBER {
@@ -289,6 +320,9 @@ expression:
   | expression POW expression {
         $$ = create_node("**", 2, $1, $3);
     }
+  | expression IS expression {
+        $$ = create_node("is", 2, $1, $3);
+    }
 
 ;
 
@@ -310,7 +344,12 @@ if_stmt:
     IF expression COLON block elif_list else_opt {
         $$ = create_node("IF", 3, $2, $4, $5 ? $5 : create_node("PASS", 0));
     }
+  | IF expression COLON statement elif_list else_opt {
+        ASTNode* block = create_node("BLOCK", 1, create_node("STATEMENTS", 1, $4));
+        $$ = create_node("IF", 3, $2, block, $5 ? $5 : create_node("PASS", 0));
+    }
 ;
+
 
 elif_list:
     /* empty */ { $$ = NULL; }
@@ -332,9 +371,17 @@ elif_list:
 
 else_opt:
     /* empty */ { $$ = NULL; }
-  | ELSE COLON block            { $$ = $3; }
-  | ELSE COLON statement        { $$ = create_node("BLOCK", 1, $3); }
+  | ELSE COLON statement {
+        // If it's already a block, use it directly
+        if (strcmp($3->name, "BLOCK") == 0) {
+            $$ = $3;
+        } else {
+            $$ = create_node("BLOCK", 1, create_node("STATEMENTS", 1, $3));
+        }
+    }
 ;
+
+
 
 
 while_stmt:
@@ -354,6 +401,7 @@ int yyerror(const char *s) {
 
 int main() {
     if (yyparse() == 0 && root != NULL) {
+        check_semantics(root);   // כאן נקרא את הסמנטיקה
         print_ast(root, 0);
         free_ast(root);
     }

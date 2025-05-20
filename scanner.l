@@ -22,6 +22,7 @@ int yylineno = 1;
 "else"          { return ELSE; }
 "while"         { return WHILE; }
 "pass"          { return PASS; }
+"is"            { return IS; }
 
 "=="            { return EQ; }
 "!="            { return NEQ; }
@@ -59,10 +60,12 @@ int yylineno = 1;
 [0-9]+           { yylval.num = atoi(yytext); return NUMBER; }
 
 \"([^\"\\]|\\.)*\"   { yylval.id = strdup(yytext); return STRING_LITERAL; }
+\'([^\'\\\n])*\'     { yylval.id = strdup(yytext); return STRING_LITERAL; }
 [a-zA-Z_][a-zA-Z0-9_]* { yylval.id = strdup(yytext); return IDENTIFIER; }
 
 [ \t\r]+         ;
 \n                { yylineno++; }
+\#[^\n]*    ;  // skip single-line comments starting with #
 
 .                 { printf("Unknown char: %s\n", yytext); return 0; }
 
