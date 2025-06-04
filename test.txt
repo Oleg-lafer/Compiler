@@ -1,4 +1,11 @@
+def foo(bool x = 5; bool b = true) -> bool:{
+  int y=1;
+  if 5>4:{
+    return true;
+  }
+    return true; 
+}
+
 def __main__(): {
-  int x;
-  string x;  
+  return;
 }

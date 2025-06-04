@@ -108,18 +108,19 @@ param_group:
     TYPE param_decl_list {
         for (int i = 0; i < $2->child_count; i++) {
             ASTNode* param = $2->children[i];
-            if (strcmp(param->children[0]->name, "DUMMY") == 0) {
-                free(param->children[0]);
-                param->children[0] = create_node($1, 0);
-            }
+            free(param->children[0]);
+            param->children[0] = create_node($1, 0); // grouped type
         }
         $$ = $2;
         free($1);
     }
-  | param_decl_list {
-        $$ = $1;  // for id: type = value style that sets its own type
+  | param_decl {
+        $$ = create_node("PARAMS", 1, $1);
     }
+
 ;
+
+
 
 param_decl_list:
     param_decl { $$ = create_node("PARAMS", 1, $1); }
@@ -135,23 +136,33 @@ param_decl_list:
 ;
 
 param_decl:
-    // TYPE-first style
-    IDENTIFIER {
+    TYPE IDENTIFIER {
+        ASTNode* type = create_node($1, 0);
+        ASTNode* id = create_node($2, 0);
+        $$ = create_node("PARAM", 2, type, id);
+        free($1); free($2);
+    }
+  | TYPE IDENTIFIER ASSIGN expression {
+        ASTNode* type = create_node($1, 0);
+        ASTNode* id = create_node($2, 0);
+        $$ = create_node("PARAM_DEFAULT", 3, type, id, $4);
+        free($1); free($2);
+    }
+  | IDENTIFIER {
         ASTNode* id = create_node($1, 0);
         $$ = create_node("PARAM", 2, create_node("DUMMY", 0), id);
         free($1);
     }
-  | IDENTIFIER COLON expression {
-        ASTNode* id = create_node($1, 0);
-        $$ = create_node("PARAM_DEFAULT", 3, create_node("DUMMY", 0), id, $3);
-        free($1);
-    }
-    // ID-first style
   | IDENTIFIER COLON TYPE {
         ASTNode* type = create_node($3, 0);
         ASTNode* id = create_node($1, 0);
         $$ = create_node("PARAM", 2, type, id);
         free($1); free($3);
+    }
+  | IDENTIFIER COLON expression {
+        ASTNode* id = create_node($1, 0);
+        $$ = create_node("PARAM_DEFAULT", 3, create_node("DUMMY", 0), id, $3);
+        free($1);
     }
   | IDENTIFIER COLON TYPE ASSIGN expression {
         ASTNode* type = create_node($3, 0);
@@ -160,9 +171,6 @@ param_decl:
         free($1); free($3);
     }
 ;
-
-
-
 
 
 
