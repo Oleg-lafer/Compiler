@@ -152,6 +152,22 @@ const char* evaluate_expr_type(ASTNode* expr, Scope* scope) {
             if (strcmp(left_type, "bool") == 0 && strcmp(right_type, "bool") == 0)
                 return "bool";
         }
+
+        // גישה למערך: arr[index]
+        if (strcmp(expr->name, "INDEX") == 0 && expr->child_count == 2) {
+            const char* index_type = evaluate_expr_type(expr->children[1], scope);
+            if (!index_type || strcmp(index_type, "int") != 0) {
+                printf("Semantic Error: array index must be of type 'int', but got '%s'\n",
+                    index_type ? index_type : "unknown");
+                semantic_errors++;
+                return NULL;
+            }
+
+            // בהנחה שהמערך הוא מסוג T[], נחזיר את T (כאן נניח int לדוגמה)
+            // אפשר להרחיב בהמשך לפי טיפוס משתנה arr
+            return "int";  // TEMP – נניח מערך של int
+        }
+
     }
 
     // משתנה

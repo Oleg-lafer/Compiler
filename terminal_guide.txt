@@ -8,3 +8,8 @@ flex scanner.l
 bison -d parser.y
 gcc -o myparser parser.tab.c lex.yy.c ast.c semantic.c -lfl
 ./myparser < test.txt
+
+
+git add .
+git commit -m "Add semantic check for default param types-11"
+git push origin main

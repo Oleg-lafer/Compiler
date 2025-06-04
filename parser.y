@@ -207,6 +207,17 @@ statement:
 
 ;
 
+type:
+    TYPE                  { $$ = create_node($1, 0); free($1); }
+  | TYPE LBRACK RBRACK    {
+        char* array_type = malloc(strlen($1) + 3);
+        sprintf(array_type, "%s[]", $1);  // "int" → "int[]"
+        $$ = create_node(array_type, 0);
+        free($1);
+    }
+;
+
+
 declaration:
     TYPE IDENTIFIER {
         $$ = create_node("DECL", 2, create_node($1, 0), create_node($2, 0));
